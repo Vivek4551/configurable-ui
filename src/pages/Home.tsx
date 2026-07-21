@@ -8,11 +8,7 @@ function Home({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home</Text>
-      <TouchableWithoutFeedback
-        onPress={() =>
-          navigation.navigate('Details', { city: 'sasaram', state: 'bihar' })
-        }
-      >
+      <TouchableWithoutFeedback onPress={() => navigation.navigate('Details')}>
         <Text style={styles.buttonText}>Go to Details</Text>
       </TouchableWithoutFeedback>
     </View>

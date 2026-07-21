@@ -4,7 +4,7 @@ import Details from './pages/Details';
 
 export type RootStackParamList = {
   Home: undefined;
-  Details: { city: string; state: 'bihar' };
+  Details: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

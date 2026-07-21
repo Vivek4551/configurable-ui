@@ -1,64 +1,39 @@
-import { Image, Text, View } from 'react-native';
+/* eslint-disable react-native/no-inline-styles */
+import { Image, StyleSheet, Text, View } from 'react-native';
 import type { LayoutConfig } from './types';
 
-// ponytail: RN's own `gap` style counts toward line-overflow, so two 50%-wide
-// items + gap wrap early. Using negative margin on the container + matching
-// padding on each child keeps percentage widths exact regardless of gap.
-export default function DynamicRenderer({ config, sized = true }: { config: LayoutConfig; sized?: boolean }) {
-  const layoutStyle = sized
-    ? {
-        flexGrow: config.flexGrow ?? (config.width ? 0 : 1),
-        flexShrink: 1,
-        flexBasis: config.width ?? 0,
-        minWidth: config.minWidth,
-      }
-    : { flexGrow: 1, flexShrink: 1 };
+const isRowDir = (d?: string) => d === 'row' || d === 'row-reverse';
 
-  switch (config.type) {
+function Leaf({ node }: { node: LayoutConfig }) {
+  switch (node.type) {
     case 'text':
-      return <Text style={[layoutStyle, config.style]}>{config.text}</Text>;
+      return <Text style={node.style}>{node.text}</Text>;
     case 'image':
-      return <Image source={{ uri: config.source }} style={[layoutStyle, config.style]} />;
+      return <Image source={{ uri: node.source }} style={node.style} />;
     case 'spacer':
-      return <View style={[layoutStyle, config.style]} />;
+      return <View style={[styles.fill, node.style]} />;
     case 'card':
     case 'group': {
-      const half = (config.gap ?? 0) / 2;
-      const flexDirection = config.flexDirection ?? (config.type === 'group' ? 'row' : 'column');
-      // wrapping only makes sense for row-direction reflow — wrapping a column
-      // with no fixed height collapses it (Yoga has no cross size to wrap against)
-      const isRow = flexDirection === 'row' || flexDirection === 'row-reverse';
-      const flexWrap = config.wrap === undefined ? (isRow ? 'wrap' : 'nowrap') : config.wrap ? 'wrap' : 'nowrap';
+      const half = (node.gap ?? 0) / 2;
+      const flexDirection =
+        node.flexDirection ?? (node.type === 'group' ? 'row' : 'column');
+      const wrap = node.wrap ?? isRowDir(flexDirection);
       return (
         <View
           style={[
-            layoutStyle,
+            styles.container,
             {
               flexDirection,
-              flexWrap,
-              justifyContent: config.justifyContent,
-              alignItems: config.alignItems,
+              flexWrap: wrap ? 'wrap' : 'nowrap',
+              justifyContent: node.justifyContent,
+              alignItems: node.alignItems,
               margin: -half,
             },
-            config.style,
+            node.style,
           ]}
         >
-          {config.children?.map((child, i) => (
-            <View
-              key={i}
-              style={{
-                padding: half,
-                // equal-split (basis 0, grow 1) only makes sense for row reflow with
-                // no explicit width; a column's auto height must hug its content, so
-                // basis defaults to 'auto' there — flexBasis 0 would collapse it to 0
-                flexGrow: child.flexGrow ?? (child.width !== undefined ? 0 : isRow ? 1 : 0),
-                flexShrink: 1,
-                flexBasis: child.width ?? (isRow ? 0 : 'auto'),
-                minWidth: child.minWidth,
-              }}
-            >
-              <DynamicRenderer config={child} sized={false} />
-            </View>
+          {node.children?.map((child, i) => (
+            <Cell key={i} node={child} gutter={half} />
           ))}
         </View>
       );
@@ -67,3 +42,38 @@ export default function DynamicRenderer({ config, sized = true }: { config: Layo
       return null;
   }
 }
+
+function Cell({ node, gutter }: { node: LayoutConfig; gutter: number }) {
+  return (
+    <View
+      style={[
+        styles.cell,
+        {
+          padding: gutter,
+          flexBasis: node.width ?? 'auto',
+          flexGrow: node.flexGrow ?? (node.width !== undefined ? 0 : 1),
+          minWidth: node.minWidth,
+        },
+      ]}
+    >
+      <Leaf node={node} />
+    </View>
+  );
+}
+
+export default function DynamicRenderer({ config }: { config: LayoutConfig }) {
+  return <Leaf node={config} />;
+}
+
+const styles = StyleSheet.create({
+  fill: { 
+    flex: 1 
+  },
+  container: { 
+    flexGrow: 1, 
+    flexShrink: 1 
+  },
+  cell: { 
+    flexShrink: 1 
+  },
+});

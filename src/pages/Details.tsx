@@ -1,27 +1,19 @@
-import { StyleSheet, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import DynamicRenderer from '../dynamic/DynamicRenderer';
 import layout from '../dynamic/layout.example.json';
 import type { LayoutConfig } from '../dynamic/types';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Details'>;
-
-function Details({ route }: Props) {
-  const { city, state } = route.params;
+function Details() {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.title}>Details</Text>
-      <Text>city: {city}</Text>
-      <Text>state: {state}</Text>
       <DynamicRenderer config={layout as LayoutConfig} />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  content: {
     padding: 16,
     gap: 12,
   },

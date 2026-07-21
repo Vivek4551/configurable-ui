@@ -5,7 +5,7 @@
   "children": [
     {
       "type": "card",
-      "width": "100%",
+      "width": "50%",
       "minWidth": 160,
       "style": { "backgroundColor": "#4f46e5", "borderRadius": 12, "padding": 16 },
       "children": [
@@ -23,7 +23,7 @@
     },
     {
       "type": "group",
-      "width": "100%",
+      "width": "50%",
       "minWidth": 160,
       "flexDirection": "column",
       "gap": 8,
